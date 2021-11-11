@@ -41,13 +41,17 @@ def delete_conc():
                 with open('contacts.txt') as load_file:
                     rm_content = load_file.readlines()
 
-                    print(rm_content)
+                    #this function searches through the list returned by rm_content and deletes the contact that the user doesn't want
+                    def search_list(rm_content, keyword):
+                        for i in range(len(rm_content)):
+                            if rm_content[i] == 'Name: ' + keyword + '\n':
+                                for n in range(-2, 3):
+                                    rm_content[i + n] = ''
 
-                    for i in range(1, 6): 
-                        del rm_content[line_num - 5]
-                        print(rm_content)
+                                break
 
-                #writing the rest of the file
+                search_list(rm_content, keyword)
+                
                 with open('contacts.txt', 'w') as write_concs:
                     write_concs.writelines(rm_content)
 
