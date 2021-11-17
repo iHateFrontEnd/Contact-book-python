@@ -1,9 +1,10 @@
 from email_validator import validate_email, EmailNotValidError
 import tkinter as tk
+import json
 
 def back(now, future):
     now.pack_forget()
-    future.pack() 
+    future.pack()
 
 #this function allows the user to delete his/her contacts
 def delete_conc():
@@ -12,10 +13,8 @@ def delete_conc():
     global delete_conc_frame
     delete_conc_frame = tk.Frame(root)
     delete_conc_frame.pack()
-
-    tk.Label(delete_conc_frame, text='Enter the contact name that you want to remove').pack()
-
-    keyword = tk.StringVar()
+    tk.Label(delete_conc_frame, text='Enter the contact name that you want to remove').pack() 
+    keyword = tk.StringVar() 
     keyword_inp = tk.Entry(delete_conc_frame, textvariable=keyword)
     keyword_inp.pack()
 
@@ -23,12 +22,12 @@ def delete_conc():
     def remove_conc():
         keyword = keyword_inp.get()
 
-        with open('contacts.txt') as contacts:
+        with open(username + '.txt') as contacts:
             line_num = 0
-            text_found = False 
+            text_found = False
 
             for line in contacts:
-                line_num += 1 
+                line_num += 1
 
                 if keyword in line:
                     text_found = True
@@ -38,7 +37,7 @@ def delete_conc():
                 tk.Label(delete_conc_frame, text='Please enter a contact name to delete it').pack()
             elif text_found == True:
                 #loading the file into a variable
-                with open('contacts.txt') as load_file:
+                with open(username + '.txt') as load_file:
                     rm_content = load_file.readlines()
 
                     #this function searches through the list returned by rm_content and deletes the contact that the user doesn't want
@@ -51,8 +50,8 @@ def delete_conc():
                                 break
 
                 search_list(rm_content, keyword)
-                
-                with open('contacts.txt', 'w') as write_concs:
+
+                with open(username + '.txt', 'w') as write_concs:
                     write_concs.writelines(rm_content)
 
                     delete_conc_frame.pack_forget()
@@ -75,7 +74,7 @@ def delete_conc():
                 global err_del_conc_frame
                 err_del_conc_frame = tk.Frame(root)
                 err_del_conc_frame.pack()
-                
+
                 tk.Label(err_del_conc_frame, text='Contact not found').pack()
 
                 #this function passes params to back
@@ -99,7 +98,7 @@ def delete_conc():
 def edit_concs():
     startup_frame.pack_forget()
 
-    global edit_conc_frame 
+    global edit_conc_frame
     edit_conc_frame = tk.Frame(root)
     edit_conc_frame.pack()
 
@@ -111,7 +110,7 @@ def edit_concs():
 
     tk.Label(edit_conc_frame, text='Enter new contact name').pack()
 
-    new_name = tk.StringVar() 
+    new_name = tk.StringVar()
     new_name_inp = tk.Entry(edit_conc_frame, textvariable=new_name)
     new_name_inp.pack()
 
@@ -130,16 +129,16 @@ def edit_concs():
     #this function replaces contacts
     def replace_conc():
         keyword = keyword_inp.get()
-        new_name = new_name_inp.get()   
+        new_name = new_name_inp.get()
         new_number = new_number_inp.get()
         new_email = new_email_inp.get()
-        
+
         try:
             valid = validate_email(new_email)
             new_email = valid.email
-            
+
             if new_number.isnumeric() and len(new_number) >= 10:
-                with open('contacts.txt') as contacts:
+                with open(username + '.txt') as contacts:
                     line_num = 0
                     text_found = False
 
@@ -154,7 +153,7 @@ def edit_concs():
                         tk.Label(edit_conc_frame, text='Please enter a contact name to repalce it').pack()
                     elif text_found == True:
                         #editing the contact
-                        with open('contacts.txt') as edit_concs:
+                        with open(username + '.txt') as edit_concs:
                             new_content = edit_concs.readlines()
 
                             new_content[line_num - 3] = '\n'
@@ -164,7 +163,7 @@ def edit_concs():
                             new_content[line_num + 1] = 'Email: ' + new_email + '\n'
 
                         #writing the contacts
-                        with open('contacts.txt', 'w') as write_edited_conc:
+                        with open(username + '.txt', 'w') as write_edited_conc:
                             write_edited_conc.writelines(new_content)
 
                             edit_conc_frame.pack_forget()
@@ -213,10 +212,10 @@ def search_concs():
     keyword_inp.pack()
 
     #this function searches the contact and returns the searched contact
-    def return_result():    
-        keyword = keyword_inp.get() 
+    def return_result():
+        keyword = keyword_inp.get()
 
-        with open('contacts.txt') as contacts:
+        with open(username + '.txt') as contacts:
             line_num = 0
             text_found = False
 
@@ -227,7 +226,7 @@ def search_concs():
                     text_found = True
                     break
 
-            if len(keyword) == 0 and text_found == True: 
+            if len(keyword) == 0 and text_found == True:
                 tk.Label(search_conc_frame, text='Please enter a contact name').pack()
             elif text_found == True:
                 search_conc_frame.pack_forget()
@@ -278,7 +277,7 @@ def search_concs():
 def save_conc():
     startup_frame.pack_forget()
 
-    global save_conc_frame 
+    global save_conc_frame
     save_conc_frame = tk.Frame(root)
 
     save_conc_frame.pack()
@@ -308,19 +307,19 @@ def save_conc():
         email = email_inp.get()
 
 
-        try: 
+        try:
             valid = validate_email(email)
             email = valid.email
 
             if number.isnumeric() and len(number):
-                with open('contacts.txt', 'a') as contacts:
+                with open(username + '.txt', 'a') as contacts:
                     contacts.write('\n')
                     contacts.write('\n')
 
                     contacts.write('Name: ' + name)
                     contacts.write('\n')
 
-                    contacts.write('Number: ' + number) 
+                    contacts.write('Number: ' + number)
                     contacts.write('\n')
 
                     contacts.write('Email: ' + email)
@@ -355,13 +354,9 @@ def save_conc():
     back_btn = tk.Button(save_conc_frame, text='Back', command=pass_params_back)
     back_btn.pack()
 
-def main(): 
-    global root 
-    root = tk.Tk()
-    root.title('Contact book')
-    root.geometry('500x500')
-
-    global startup_frame 
+#this function allows the user to do everything 
+def startup():
+    global startup_frame
     startup_frame = tk.Frame(root)
     startup_frame.pack()
 
@@ -375,9 +370,119 @@ def main():
     edit_conc_btn.pack()
 
     delete_conc_btn = tk.Button(startup_frame, text='Delet contact', command=delete_conc)
-    delete_conc_btn.pack()
+    delete_conc_btn.pack()    
+
+#this function allows the user to login 
+def login(username, password):
+    with open('account.json') as users:
+        username_found = False
+
+        for line in users:
+            if username in line:
+                username_found = True
+                break
+        
+        if username == '' and password == '':
+            tk.Label(login_frame, text='Incorrect username or password').pack()
+        elif username_found == True:
+            password_found = False
+
+            for line in users:
+                if password in line:
+                   
+                    password_found = True
+                    break
+            
+            if username == '' and password == '':
+                tk.Label(login_frame, text='Incorrect username or password').pack()
+            elif password_found == True:
+                login_frame.pack_forget()
+                startup()
+            else:
+                tk.Label(login_frame, text='Incorrect username or password').pack()
+        else:
+            tk.Label(login_frame, text='Incorrect username or password').pack()
+
+def create_account():
+    login_frame.pack_forget()
+
+    global create_account_frame
+    create_account_frame = tk.Frame(root)
+    create_account_frame.pack()
+
+    tk.Label(create_account_frame, text='Enter your new username:').pack()
+
+    new_username = tk.StringVar()
+    new_username_inp = tk.Entry(create_account_frame, textvariable=new_username)
+    new_username_inp.pack()
+
+    tk.Label(create_account_frame, text='Enter your new password:').pack()
+
+    new_password = tk.StringVar()
+    new_password_inp = tk.Entry(create_account_frame, textvariable=new_password)
+    new_password_inp.pack()
+
+    #this function saves the users info in account.json
+    def write_username_pwd():
+        new_username = new_username_inp.get()
+        new_password = new_password_inp.get()
+
+        with open('account.json', 'a') as users:
+            json_data = {
+                "username": new_username,
+                "password": new_password
+            }
+
+            users.write('\n')
+
+            users.write(json.dumps(json_data, indent=0))
+
+        back(create_account_frame, login_frame)
+
+    create_conc_btn = tk.Button(create_account_frame, text='Create', command=write_username_pwd)
+    create_conc_btn.pack()
+    
+
+def login_data():
+    global root
+    root = tk.Tk()
+    root.title('Contact book')
+    root.geometry('500x500')
+
+    global login_frame
+    login_frame = tk.Frame(root)
+    login_frame.pack()
+
+    tk.Label(login_frame, text='Enter your user name to login').pack()
+
+    username = tk.StringVar()
+    username_inp = tk.Entry(login_frame, textvariable=username)
+    username_inp.pack()
+
+    tk.Label(login_frame, text='Enter the password to login').pack()
+
+    password = tk.StringVar()
+    password_inp = tk.Entry(login_frame, textvariable=password)
+    password_inp.pack()
+
+    def pass_params_login():
+        global username
+        username = username_inp.get()
+
+        global password
+        password = password_inp.get()
+
+        login(username, password)
+
+    login_btn = tk.Button(login_frame, text='Login', command=pass_params_login)
+    login_btn.pack()
+
+    tk.Label(login_frame, text="If you don't yet have an account then create one by click the button below").pack()
+
+    sign_up_btn = tk.Button(login_frame, text='Sign up', command=create_account)
+    sign_up_btn.pack()
 
     root.mainloop()
 
 if __name__ == '__main__':
-    main()
+    login_data()
