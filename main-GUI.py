@@ -369,7 +369,7 @@ def startup():
     edit_conc_btn = tk.Button(startup_frame, text='Edit contact', command=edit_concs)
     edit_conc_btn.pack()
 
-    delete_conc_btn = tk.Button(startup_frame, text='Delet contact', command=delete_conc)
+    delete_conc_btn = tk.Button(startup_frame, text='Delete contact', command=delete_conc)
     delete_conc_btn.pack()    
 
 #this function allows the user to login 
