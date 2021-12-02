@@ -1,5 +1,7 @@
 from email_validator import validate_email, EmailNotValidError
 import tkinter as tk
+from tkinter import filedialog
+import os
 import json
 
 def back(now, future):
@@ -12,6 +14,7 @@ def delete_conc():
 
     global delete_conc_frame
     delete_conc_frame = tk.Frame(root)
+
     delete_conc_frame.pack()
     tk.Label(delete_conc_frame, text='Enter the contact name that you want to remove').pack() 
     keyword = tk.StringVar() 
@@ -197,6 +200,61 @@ def edit_concs():
     back_btn = tk.Button(edit_conc_frame, text='back', command=pass_params_back)
     back_btn.pack()
 
+#this function backs up all the contacts 
+def back_up_concs():
+    startup_frame.pack_forget()
+
+    global back_up_frame
+    back_up_frame = tk.Frame(root)
+    back_up_frame.pack()
+
+    tk.Label(back_up_frame, text='Click the Start button below to choose where you wnat to backup your contact').pack()
+
+    def choose_backup_location():
+
+        try:
+            select_target_dir = filedialog.askdirectory()
+
+            #loading the content from current contact file
+            with open(username + '.txt') as current_contacts:
+                content = current_contacts.readlines()
+
+            os.chdir(str(select_target_dir))
+
+            backup_file = os.path.join(os.getcwd(), username + '.txt')
+
+            #creating a the backup file and writing to it
+            with open(backup_file, 'a') as write_backup_file:
+                write_backup_file.writelines(json.dumps(content))
+
+            back_up_frame.pack_forget()
+
+            global back_to_home_frame
+            back_to_home_frame = tk.Frame(root)
+            back_to_home_frame.pack()
+
+            tk.Label(back_to_home_frame, text='Done!').pack()
+
+            #this function passes params to back
+            def pass_params_back():
+                back(back_to_home_frame, startup_frame)
+
+            home_btn = tk.Button(back_to_home_frame, text='Home', command=pass_params_back)
+            home_btn.pack()
+        except:
+            tk.Label(back_up_frame, text="Seems like you haven't saved any contacts").pack()
+
+
+    start_backup = tk.Button(back_up_frame, text='Start', command=choose_backup_location)
+    start_backup.pack()
+
+    #this function passes params to back
+    def pass_params_back():
+        back(back_up_frame, startup_frame)
+
+    back_btn = tk.Button(back_up_frame, text='Back', command=pass_params_back)
+    back_btn.pack()
+
 #this function allows the user to view his/her contacts
 def search_concs():
     startup_frame.pack_forget()
@@ -372,36 +430,64 @@ def startup():
     delete_conc_btn = tk.Button(startup_frame, text='Delete contact', command=delete_conc)
     delete_conc_btn.pack()    
 
+    backup_btn = tk.Button(startup_frame, text='Back up', command=back_up_concs)
+    backup_btn.pack()
+
+    #this function logs out the user by reopening the same window
+    def logout_user():
+        back(startup_frame, login_frame)
+
+    log_out_btn = tk.Button(startup_frame, text='Logout', command=logout_user)
+    log_out_btn.pack()
+
 #this function allows the user to login 
 def login(username, password):
-    with open('account.json') as users:
-        username_found = False
-
-        for line in users:
-            if username in line:
-                username_found = True
-                break
+    try:
+        with open('account.json') as users:
+            accounts = users.readlines()
         
-        if username == '' and password == '':
-            tk.Label(login_frame, text='Incorrect username or password').pack()
-        elif username_found == True:
-            password_found = False
+            #this function loads the users file into a list then searches for the username and password
+            def search_username_password():
+                username_found = True
 
-            for line in users:
-                if password in line:
-                   
-                    password_found = True
-                    break
-            
-            if username == '' and password == '':
-                tk.Label(login_frame, text='Incorrect username or password').pack()
-            elif password_found == True:
-                login_frame.pack_forget()
-                startup()
-            else:
-                tk.Label(login_frame, text='Incorrect username or password').pack()
-        else:
-            tk.Label(login_frame, text='Incorrect username or password').pack()
+                #checking username
+                for i in range(len(accounts)):
+                    if accounts[i] == '"username": "' + username + '",\n':
+                        username_found = True
+                        break
+                
+                if username_found == True:
+                    password_found = False
+                    
+                    #checking password
+                    for n in range(len(accounts)):
+                        if accounts[n] == '"password": "' + password + '"\n':
+                            password_found = True
+                            break
+
+                    if password_found == True:
+                        username_list = accounts[i]
+                        password_list = accounts[n]
+
+                        if len(username_list) == 16 + len(username):
+                            if len(password_list) == 15 + len(password):
+                                login_frame.pack_forget()
+                                startup()
+                            else:
+                                tk.Label(login_frame, text='Incorrect password or username').pack()
+                        else:
+                            tk.Label(login_frame, text='Incorrect password or username').pack()
+                    else:
+                        tk.Label(login_frame, text='Incorrect password or username').pack()
+                else:
+                    tk.Label(login_frame, text='Incorrect password or username').pack()
+
+            search_username_password()
+    except:
+        with open('account.json', 'a'):
+            pass
+
+        login()
 
 def create_account():
     login_frame.pack_forget()
@@ -427,22 +513,35 @@ def create_account():
         new_username = new_username_inp.get()
         new_password = new_password_inp.get()
 
-        with open('account.json', 'a') as users:
-            json_data = {
-                "username": new_username,
-                "password": new_password
-            }
+        if new_username == '' and new_password == '':
+            tk.Label(create_account_frame, text='Please enter a proper username and password').pack()
+        elif len(new_username) >= 1 and new_password == '':
+            tk.Label(create_account_frame, text='Please enter a proper password').pack()
+        elif new_username == '' and len(new_password):
+            tk.Label(create_account_frame, text='Please enter a  proper username').pack()
+        elif len(new_username) >= 1 and len(new_password) >= 1:
+            with open('account.json', 'a') as users:
+                json_data = {
+                    "username": new_username,
+                    "password": new_password
+                }
 
-            users.write('\n')
+                users.write('\n')
 
-            users.write(json.dumps(json_data, indent=0))
+                users.write(json.dumps(json_data, indent=0))
 
-        back(create_account_frame, login_frame)
+            back(create_account_frame, login_frame)
 
     create_conc_btn = tk.Button(create_account_frame, text='Create', command=write_username_pwd)
     create_conc_btn.pack()
-    
+   
+    #this function pass params to back
+    def pass_params_back():
+        back(create_account_frame, login_frame)
 
+    home_btn = tk.Button(create_account_frame, text='Home', command=pass_params_back)
+    home_btn.pack()
+ 
 def login_data():
     global root
     root = tk.Tk()
