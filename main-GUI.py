@@ -1,9 +1,6 @@
-#      HI NEVED, THIS IS RUSHABH.  
-
-
 from email_validator import validate_email, EmailNotValidError
 import tkinter as tk
-from tkinter import filedialog
+import tkinter.filedialog
 import os
 import json
 
@@ -203,59 +200,54 @@ def edit_concs():
     back_btn = tk.Button(edit_conc_frame, text='back', command=pass_params_back)
     back_btn.pack()
 
-#this function backs up all the contacts 
-def back_up_concs():
+#this function allows the user to backup contacts
+def backup_conc():
     startup_frame.pack_forget()
 
-    global back_up_frame
-    back_up_frame = tk.Frame(root)
-    back_up_frame.pack()
+    global backup_frame
+    backup_frame = tk.Frame(root)
+    backup_frame.pack()
 
-    tk.Label(back_up_frame, text='Click the Start button below to choose where you wnat to backup your contact').pack()
+    tk.Label(backup_frame, text="Click the start button to start the back up").pack()
 
-    def choose_backup_location():
+    #this function writes the saved contact to the desired location the user wants
+    def write_backup_file():
+        select_target_dir = tkinter.filedialog.askdirectory()
 
-        try:
-            select_target_dir = filedialog.askdirectory()
+        #loading the content from current contact file
+        with open(username + '.txt') as current_contacts:
+            content = current_contacts.readlines()
 
-            #loading the content from current contact file
-            with open(username + '.txt') as current_contacts:
-                content = current_contacts.readlines()
+        os.chdir(str(select_target_dir))
 
-            os.chdir(str(select_target_dir))
+        backup_file = os.path.join(os.getcwd(), username + '.txt')
 
-            backup_file = os.path.join(os.getcwd(), username + '.txt')
+        #creating a the backup file and writing to it
+        with open(backup_file, 'a') as write_backup_file:
+            write_backup_file.writelines(content)
 
-            #creating a the backup file and writing to it
-            with open(backup_file, 'a') as write_backup_file:
-                write_backup_file.writelines(json.dumps(content))
+        backup_frame.pack_forget()
 
-            back_up_frame.pack_forget()
+        global back_to_home_frame
+        back_to_home_frame = tk.Frame(root)
+        back_to_home_frame.pack()
 
-            global back_to_home_frame
-            back_to_home_frame = tk.Frame(root)
-            back_to_home_frame.pack()
+        tk.Label(back_to_home_frame, text='Done!').pack()
 
-            tk.Label(back_to_home_frame, text='Done!').pack()
+        #this function passes params to back
+        def pass_params_back():
+            back(back_to_home_frame, startup_frame)
 
-            #this function passes params to back
-            def pass_params_back():
-                back(back_to_home_frame, startup_frame)
+        home_btn = tk.Button(back_to_home_frame, text='Home', command=pass_params_back)
+        home_btn.pack()
 
-            home_btn = tk.Button(back_to_home_frame, text='Home', command=pass_params_back)
-            home_btn.pack()
-        except:
-            tk.Label(back_up_frame, text="Seems like you haven't saved any contacts").pack()
+    start_backup_btn = tk.Button(backup_frame, text="Start", command=write_backup_file)
+    start_backup_btn.pack()
 
-
-    start_backup = tk.Button(back_up_frame, text='Start', command=choose_backup_location)
-    start_backup.pack()
-
-    #this function passes params to back
     def pass_params_back():
-        back(back_up_frame, startup_frame)
+        back(backup_frame, startup_frame)
 
-    back_btn = tk.Button(back_up_frame, text='Back', command=pass_params_back)
+    back_btn = tk.Button(backup_frame, text="Back", command=pass_params_back)
     back_btn.pack()
 
 #this function allows the user to view his/her contacts
